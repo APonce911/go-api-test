@@ -5,9 +5,8 @@ import (
 	"net/http"
 )
 
-type server struct{}
 
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	switch r.Method {
@@ -29,7 +28,6 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func main() {
-	s := &server{}
-	http.Handle("/", s)
+	http.HandleFunc("/", home)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

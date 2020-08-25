@@ -20,6 +20,19 @@ type response struct {
 	Status string
 }
 
+func main() {
+	r := mux.NewRouter()
+	api := r.PathPrefix("/api/v1").Subrouter()
+	api.HandleFunc("", get).Methods(http.MethodGet)
+	api.HandleFunc("", post).Methods(http.MethodPost)
+	api.HandleFunc("", put).Methods(http.MethodPut)
+	api.HandleFunc("", delete).Methods(http.MethodDelete)
+	api.HandleFunc("", notFound)
+	api.HandleFunc("/user/{userID}/comment/{commentID}", params).Methods(http.MethodGet)
+
+	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
 func get(w http.ResponseWriter, r *http.Request) {
 	m := message{
 		Name: "Alice",
@@ -50,7 +63,7 @@ func post(w http.ResponseWriter, r *http.Request) {
 		fmt.Errorf("Unmarshalling error")
 	}
 
-	fmt.Println(requestBody)
+	fmt.Printf("%+v", requestBody)
 
 	responseBody := response{Status: "Success"}
 	response, err := json.Marshal(responseBody)
@@ -107,17 +120,4 @@ func params(w http.ResponseWriter, r *http.Request) {
 	location := query.Get("location")
 
 	w.Write([]byte(fmt.Sprintf(`{"userID": %d, "commentID": %d, "location": "%s" }`, userID, commentID, location)))
-}
-
-func main() {
-	r := mux.NewRouter()
-	api := r.PathPrefix("/api/v1").Subrouter()
-	api.HandleFunc("", get).Methods(http.MethodGet)
-	api.HandleFunc("", post).Methods(http.MethodPost)
-	api.HandleFunc("", put).Methods(http.MethodPut)
-	api.HandleFunc("", delete).Methods(http.MethodDelete)
-	api.HandleFunc("", notFound)
-	api.HandleFunc("/user/{userID}/comment/{commentID}", params).Methods(http.MethodGet)
-
-	log.Fatal(http.ListenAndServe(":8080", r))
 }

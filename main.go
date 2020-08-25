@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,6 +15,9 @@ type message struct {
 	Name string
 	Body string
 	Time int64
+}
+type response struct {
+	Status string
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
@@ -33,9 +37,27 @@ func get(w http.ResponseWriter, r *http.Request) {
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Errorf("Reading error")
+	}
+	defer r.Body.Close()
+
+	var requestBody message
+	err = json.Unmarshal(b, &requestBody)
+
+	if err != nil {
+		fmt.Errorf("Unmarshalling error")
+	}
+
+	fmt.Println(requestBody)
+
+	responseBody := response{Status: "Success"}
+	response, err := json.Marshal(responseBody)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(`{"message":"POST called"}`))
+	w.Write([]byte(string(response)))
 }
 
 func put(w http.ResponseWriter, r *http.Request) {

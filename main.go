@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,10 +10,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type message struct {
+	Name string
+	Body string
+	Time int64
+}
+
 func get(w http.ResponseWriter, r *http.Request) {
+	m := message{
+		Name: "Alice",
+		Body: "Hello",
+		Time: 1294706395881547000}
+
+	responseBody, err := json.Marshal(m)
+	if err != nil {
+		fmt.Errorf("Marshalling error")
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message":"GET called"}`))
+	w.Write(responseBody)
 }
 
 func post(w http.ResponseWriter, r *http.Request) {
